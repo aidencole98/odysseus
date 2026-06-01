@@ -55,12 +55,33 @@ Contributing? See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, testing, and
 pull request guidelines.
 
 ### Docker (recommended)
+
+Use the prebuilt image for the quickest startup:
+
 ```bash
 git clone https://github.com/pewdiepie-archdaemon/odysseus.git
 cd odysseus
-cp .env.example .env       # optional, but recommended for explicit defaults
+cp .env.example .env       # required; edit for deployment-level overrides
+docker compose -f docker-compose.prebuilt.yml up -d
+```
+
+The prebuilt image is published to `ghcr.io/pewdiepie-archdaemon/odysseus`
+for `linux/amd64` and `linux/arm64`. It defaults to `:latest`; set
+`ODYSSEUS_IMAGE_TAG=v1.2.3` in `.env` to pin a release tag, use a `sha-*`
+tag for a commit-specific build, or pin by digest for immutability. Update with:
+
+```bash
+docker compose -f docker-compose.prebuilt.yml pull
+docker compose -f docker-compose.prebuilt.yml up -d
+```
+
+If you are contributing or want to build locally instead, use the source build
+compose file:
+
+```bash
 docker compose up -d --build
 ```
+
 Open `http://localhost:7000` when the containers are healthy. Docker Compose
 binds the web UI to `127.0.0.1` by default. If the port is taken, set
 `APP_PORT=7001` in `.env` and recreate the container. Set `APP_BIND=0.0.0.0`

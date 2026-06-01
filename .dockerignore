@@ -12,6 +12,7 @@ build/
 /data/
 /logs/
 .git/
+.github/
 .claude/
 .playwright-mcp/
 .pytest_cache/
