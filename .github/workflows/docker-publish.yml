@@ -3,14 +3,10 @@ name: Docker image
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "Dockerfile"
-      - "requirements*.txt"
-      - ".dockerignore"
-      - "docker/**"
-      - "docker-compose*.yml"
-      - "config/searxng/**"
-      - ".github/workflows/docker-publish.yml"
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "dev-docs/**"
   push:
     branches: [main]
     tags: ["v*"]
@@ -47,6 +43,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@06116385d9baf250c9f4dcb4858b16962ea869c3 # v4.0.0
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
 
@@ -61,9 +60,8 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: false
-          load: true
           tags: odysseus:ci
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
@@ -75,13 +73,17 @@ jobs:
     permissions:
       contents: read
       packages: write
-      id-token: write
-      attestations: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+
+      - name: Validate Compose files
+        run: |
+          cp .env.example .env
+          docker compose config --quiet
+          docker compose -f docker-compose.prebuilt.yml config --quiet
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@06116385d9baf250c9f4dcb4858b16962ea869c3 # v4.0.0
@@ -101,9 +103,11 @@ jobs:
         uses: docker/metadata-action@80c7e94dd9b9319bd5eb7a0e0fe9291e23a2a2e9 # v6.0.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=false
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=branch
+            type=raw,value=main,enable={{is_default_branch}}
             type=ref,event=tag
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}

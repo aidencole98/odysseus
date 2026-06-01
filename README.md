@@ -61,14 +61,14 @@ Use the prebuilt image for the quickest startup:
 ```bash
 git clone https://github.com/pewdiepie-archdaemon/odysseus.git
 cd odysseus
-cp .env.example .env       # optional, but recommended for explicit defaults
+cp .env.example .env       # required; edit for deployment-level overrides
 docker compose -f docker-compose.prebuilt.yml up -d
 ```
 
 The prebuilt image is published to `ghcr.io/pewdiepie-archdaemon/odysseus`
 for `linux/amd64` and `linux/arm64`. It defaults to `:latest`; set
-`ODYSSEUS_IMAGE_TAG=v1.2.3` in `.env` to pin a release tag, or use a `sha-*`
-tag for an immutable build. Update with:
+`ODYSSEUS_IMAGE_TAG=v1.2.3` in `.env` to pin a release tag, use a `sha-*`
+tag for a commit-specific build, or pin by digest for immutability. Update with:
 
 ```bash
 docker compose -f docker-compose.prebuilt.yml pull
